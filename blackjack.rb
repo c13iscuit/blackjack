@@ -9,21 +9,17 @@ class Card
 
   def face_card?
     if ["J","Q","K"].include?(@rank)
+      puts @rank
       @rank = 10
-      puts "face"
     else
+      puts @rank
       @rank = @rank
-      puts "nope"
     end
   end
 
   def is_ace?
     if @rank == "A"
-      @rank = 1
-      puts "ace"
-    else
-      @rank = @rank
-      puts "num"
+      true
     end
   end
 end
@@ -60,15 +56,19 @@ class Hand
   end
 
   def add_raw_hand
-    raw_score = 0
-    values.each do |value|
-      if value[0] != "A"
-          raw_score = value[0].to_i + raw_score
+    @raw_score = 0
+    @cards.each do |card|
+      if card.is_ace? != true
+        card.face_card?
+        @raw_score = card.rank + @raw_score
+        puts @raw_score
       else
-        if raw_score + 11 < 21
-          raw_score = raw_score + 11
+        if @raw_score < 11
+          @raw_score = @raw_score + 11
+          puts "ace"
+          puts @raw_score
         else
-          raw_score = raw_score + 1
+          @raw_score = @raw_score + 1
         end
       end
     end
@@ -78,11 +78,11 @@ end
 my_deck = Deck.new
 my_deck.build_deck
 player_hand = Hand.new(my_deck)
-player_hand.cards.each do |card|
-  card.face_card?
-  card.is_ace?
-  puts card.rank
-end
+player_hand.add_raw_hand
+
+
+
+
 
 
 
