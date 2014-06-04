@@ -39,13 +39,14 @@ class Deck
     @deck = @deck.shuffle
   end
 
-  def deal_card #hand as arg
+  def deal_card
     @card = @deck.pop
   end
 end
 
 class Hand
   attr_reader :cards
+  attr_reader :score
   def initialize(deck)
     @deck = deck
     @cards = []
@@ -59,20 +60,26 @@ class Hand
   end
 
   def add_raw_hand
-    @raw_score = 0
+    score = 0
     @cards.each do |card|
       if card.is_ace? != true
         card.face_card?
-        @raw_score = card.rank + @raw_score
-      else
-        if @raw_score < 11
-          @raw_score = @raw_score + 11
+        score = card.rank + score
+      end
+    end
+    score
+  end
+
+  def add_aces(raw_score)
+    @cards.each do |card|
+      if card.is_ace? == true
+        if raw_score < 11
+          raw_score = raw_score + 11
         else
-          @raw_score = @raw_score + 1
         end
       end
     end
-    @raw_score
+    raw_score
   end
 
   def show_cards
@@ -88,7 +95,6 @@ class Hand
       puts "#{card.rank}#{card.suit}"
     end
   end
-
 end
 
 my_deck = Deck.new
@@ -99,30 +105,42 @@ puts "Welcome to blackjack"
 player_hand.show_cards
 dealer_hand.show_dealer_cards
 
+dhand = dealer_hand.add_aces(dealer_hand.add_raw_hand)
+phand = player_hand.add_aces(player_hand.add_raw_hand)
+
+if phand == 21
+  puts "blackjack!"
+end
+
 puts "Would you like to hit or stay?"
 input = gets.chomp
-while player_hand.add_raw_hand < 21
+while phand < 21
   if input == "hit"
     player_hand.hit_me(my_deck)
     player_hand.show_cards
     player_hand.add_raw_hand
-    if player_hand.add_raw_hand > 21
+    player_hand.add_aces(player_hand.add_raw_hand)
+    phand = player_hand.add_aces(player_hand.add_raw_hand)
+    if phand > 21
       puts "bust!"
       break
     end
   elsif input == "stay"
-    while dealer_hand.add_raw_hand < 17
+    while dhand < 17
       dealer_hand.hit_me(my_deck)
       dealer_hand.show_dealer_cards
+      dealer_hand.add_raw_hand
+      dhand = dealer_hand.add_aces(dealer_hand.add_raw_hand)
     end
-    if dealer_hand.add_raw_hand < 22 && dealer_hand.add_raw_hand > player_hand.add_raw_hand
+    if dhand < 22 && dhand > phand
       puts "dealer wins!"
-    elsif dealer_hand.add_raw_hand < 22 && dealer_hand.add_raw_hand < player_hand.add_raw_hand
+    elsif dhand < 22 && dhand < phand
       puts "player wins!"
-    elsif dealer_hand.add_raw_hand > 21
+    elsif dhand > 21
       puts "dealer busts!"
-    else
+    elsif dhand == phand
       puts "push!"
+    else
     end
     break
   else
@@ -131,18 +149,3 @@ while player_hand.add_raw_hand < 21
   puts "Would you like to hit or stay?"
   input = gets.chomp
 end
-
-
-
-# if dealer_hand.add_raw_hand < 22 && dealer_hand.add_raw_hand > player_hand.add_raw_hand
-#   puts "dealer wins!"
-# elsif dealer_hand.add_raw_hand < 22 && dealer_hand.add_raw_hand < player_hand.add_raw_hand
-#   puts "player wins!"
-# elsif dealer_hand.add_raw_hand > 21
-#   puts "dealer busts!"
-# else
-#   puts "push!"
-# end
-
-
-
